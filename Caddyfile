@@ -1,0 +1,17 @@
+# Caddy 自动申请/续期 Let's Encrypt 证书。
+# SYNC_DOMAIN / ACME_EMAIL 来自 .env（docker-compose 注入为环境变量）。
+{
+	email {$ACME_EMAIL}
+}
+
+{$SYNC_DOMAIN} {
+	# 反代 CouchDB。Obsidian（Self-hosted LiveSync 插件）通过 HTTPS 直连这里。
+	reverse_proxy couchdb:5984
+
+	log {
+		output file /data/access.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}
