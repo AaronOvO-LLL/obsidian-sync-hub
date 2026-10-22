@@ -1,0 +1,12 @@
+# 服务器是 Linux，shell 脚本/配置必须 LF，防止 Windows 检出时被转成 CRLF
+*.sh        text eol=lf
+Caddyfile   text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.md        text eol=lf
+.env.example text eol=lf
+
+# 二进制
+*.png   binary
+*.jpg   binary
+*.gz    binary
