@@ -21,10 +21,20 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
-  echo "== 安装 Docker Engine（官方便捷脚本） =="
-  echo "   如在国内服务器下载缓慢，可改用镜像源安装，见 README '国内网络提示'"
-  apt-get update -qq && apt-get install -y -qq curl ca-certificates
-  curl -fsSL https://get.docker.com | sh
+  echo "== 安装 Docker Engine（官方 apt 源；get.docker.com 在国内常被重置） =="
+  apt-get update -qq && apt-get install -y -qq ca-certificates curl gnupg
+  install -m 0755 -d /etc/apt/keyrings
+  if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+      | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    chmod a+r /etc/apt/keyrings/docker.gpg
+  fi
+  ARCH="$(dpkg --print-architecture)"
+  CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+  echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
+    > /etc/apt/sources.list.d/docker.list
+  apt-get update -qq
+  apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   systemctl enable --now docker
 else
   echo "== Docker 已安装，跳过 =="

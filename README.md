@@ -96,7 +96,7 @@ curl https://sync.hao-rizon.com/            # 应 401 —— 公网 HTTPS 全链
 ```bash
 crontab -e
 # 每天 4:00 冷备份，本地留 14 份；装了 rclone 再配 RCLONE_REMOTE 异地保存
-0 4 * * * cd /srv/obsidian-sync-hub && ./scripts/backup.sh >> /var/log/obsidian-sync-backup.log 2>&1
+0 4 * * * cd /srv/obsidian-sync-hub && ./scripts/backup.sh >> /srv/obsidian-sync-hub/backup.log 2>&1
 ```
 
 ---
