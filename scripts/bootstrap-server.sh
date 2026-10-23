@@ -38,10 +38,9 @@ if ! command -v docker >/dev/null 2>&1; then
   done
   [[ -n "$DOCKER_APT_BASE" ]] || { echo "ERROR: 三个 Docker apt 源都不可达" >&2; exit 1; }
   echo "   使用 apt 源：$DOCKER_APT_BASE"
-  if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
-    gpg --dearmor -o /etc/apt/keyrings/docker.gpg /tmp/docker-gpg.$$
-    chmod a+r /etc/apt/keyrings/docker.gpg
-  fi
+  # 总是重建 keyring：若沿用上次失败残留的空文件，apt 会报 NO_PUBKEY
+  gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg /tmp/docker-gpg.$$
+  chmod a+r /etc/apt/keyrings/docker.gpg
   rm -f /tmp/docker-gpg.$$
   ARCH="$(dpkg --print-architecture)"
   CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
