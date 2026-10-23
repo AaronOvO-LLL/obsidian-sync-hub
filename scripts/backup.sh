@@ -8,7 +8,7 @@
 #   RCLONE_REMOTE=offsite:obsidian-backups ./scripts/backup.sh   # 同时 rclone 推送异地
 #
 # 建议 crontab（每天凌晨 4 点）：
-#   0 4 * * * cd /opt/obsidian-sync-hub && RCLONE_REMOTE=offsite:obsidian-backups ./scripts/backup.sh >> /var/log/obsidian-sync-backup.log 2>&1
+#   0 4 * * * cd /srv/obsidian-sync-hub && RCLONE_REMOTE=offsite:obsidian-backups ./scripts/backup.sh >> /var/log/obsidian-sync-backup.log 2>&1
 # ---------------------------------------------------------------------------
 set -euo pipefail
 

@@ -30,6 +30,27 @@ else
   echo "== Docker 已安装，跳过 =="
 fi
 
+# Docker Hub 加速（腾讯云内网镜像优先，daocloud 兜底）；已有 daemon.json 则不动
+if [[ ! -f /etc/docker/daemon.json ]]; then
+  echo "== 配置 Docker 镜像加速 =="
+  mkdir -p /etc/docker
+  cat > /etc/docker/daemon.json <<'EOF'
+{
+  "registry-mirrors": [
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker.m.daocloud.io"
+  ]
+}
+EOF
+  systemctl restart docker
+fi
+
+# 让调用者（sudo 用户）免 sudo 用 docker（重新登录后生效；当前会话可用 sudo docker）
+if [[ -n "${SUDO_USER:-}" ]] && id "$SUDO_USER" >/dev/null 2>&1; then
+  usermod -aG docker "$SUDO_USER"
+  echo "（已把 $SUDO_USER 加入 docker 组）"
+fi
+
 if ! docker compose version >/dev/null 2>&1; then
   echo "== 安装 docker compose 插件 =="
   apt-get update -qq && apt-get install -y -qq docker-compose-plugin

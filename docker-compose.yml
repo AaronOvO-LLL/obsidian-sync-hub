@@ -1,5 +1,9 @@
 name: obsidian-sync
 
+# 注意：HTTPS/域名由宿主机的 Caddy（hao-rizon 边缘）统一负责，
+# 本编排只跑 CouchDB，监听 127.0.0.1:5984，由边缘的站点块反代。
+# 站点块见 deploy/sync-site-block.caddy（加入 hao-rizon-dashboard 仓库的 Caddyfile）。
+
 services:
   couchdb:
     image: couchdb:3.5
@@ -11,36 +15,9 @@ services:
     volumes:
       - couchdb-data:/opt/couchdb/data
     # 仅绑定本机回环，方便在服务器上直接运行 scripts/init.sh、curl 排障、访问 Fauxton。
-    # 对外流量一律走 Caddy (HTTPS)。
+    # 对外流量一律走宿主机 Caddy (HTTPS)。
     ports:
       - "127.0.0.1:5984:5984"
-    networks:
-      - sync-net
-
-  caddy:
-    image: caddy:2
-    container_name: obsidian-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    environment:
-      SYNC_DOMAIN: ${SYNC_DOMAIN}
-      ACME_EMAIL: ${ACME_EMAIL}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      - couchdb
-    networks:
-      - sync-net
-
-networks:
-  sync-net:
 
 volumes:
   couchdb-data:
-  caddy-data:
-  caddy-config:

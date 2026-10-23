@@ -1,0 +1,7 @@
+# 加入 /srv/haorizon/deploy/Caddyfile（hao-rizon-dashboard 仓库）的站点块。
+#
+# 部署方式：改 hao-rizon-dashboard 仓库 → ./scripts/deploy.sh
+#（它会自动 caddy validate + systemctl reload caddy）
+#
+# ⚠ 不要在服务器上手改 /etc/caddy/Caddyfile —— haorizon 的部署是
+#   git reset --hard，手改会在下次发布时被无声抹掉，同步中枢随之消失。
