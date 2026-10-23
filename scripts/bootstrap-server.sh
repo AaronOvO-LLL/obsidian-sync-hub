@@ -24,14 +24,28 @@ if ! command -v docker >/dev/null 2>&1; then
   echo "== 安装 Docker Engine（官方 apt 源；get.docker.com 在国内常被重置） =="
   apt-get update -qq && apt-get install -y -qq ca-certificates curl gnupg
   install -m 0755 -d /etc/apt/keyrings
+  # apt 源链式选择：腾讯云镜像 → 阿里云镜像 → 官方（国内直连间歇性 RST，不赌单点）
+  DOCKER_APT_BASE=""
+  for base in \
+    "https://mirrors.cloud.tencent.com/docker-ce/linux/ubuntu" \
+    "https://mirrors.aliyun.com/docker-ce/linux/ubuntu" \
+    "https://download.docker.com/linux/ubuntu"; do
+    echo "   试 $base ..."
+    if curl -fsSL --connect-timeout 8 --retry 2 "$base/gpg" -o /tmp/docker-gpg.$$ 2>/dev/null; then
+      DOCKER_APT_BASE="$base"
+      break
+    fi
+  done
+  [[ -n "$DOCKER_APT_BASE" ]] || { echo "ERROR: 三个 Docker apt 源都不可达" >&2; exit 1; }
+  echo "   使用 apt 源：$DOCKER_APT_BASE"
   if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-      | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg /tmp/docker-gpg.$$
     chmod a+r /etc/apt/keyrings/docker.gpg
   fi
+  rm -f /tmp/docker-gpg.$$
   ARCH="$(dpkg --print-architecture)"
   CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
-  echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
+  echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] $DOCKER_APT_BASE $CODENAME stable" \
     > /etc/apt/sources.list.d/docker.list
   apt-get update -qq
   apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
